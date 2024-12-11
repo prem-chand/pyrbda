@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spatial.EnerMo &#8212; pyspatial 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for spatial.EnerMo</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">spatial.jcalc</span> <span class="kn">import</span> <span class="n">jcalc</span>
+<span class="kn">from</span> <span class="nn">spatial.plnr</span> <span class="kn">import</span> <span class="n">plnr</span>
+<span class="kn">from</span> <span class="nn">spatial.rotz</span> <span class="kn">import</span> <span class="n">rotz</span>
+<span class="kn">from</span> <span class="nn">spatial.xlt</span> <span class="kn">import</span> <span class="n">xlt</span>
+<span class="kn">from</span> <span class="nn">spatial.pluho</span> <span class="kn">import</span> <span class="n">pluho</span>
+<span class="kn">from</span> <span class="nn">spatial.mcI</span> <span class="kn">import</span> <span class="n">mcI</span>
+<span class="kn">from</span> <span class="nn">spatial.get_gravity</span> <span class="kn">import</span> <span class="n">get_gravity</span>
+
+
+<div class="viewcode-block" id="EnerMo">
+<a class="viewcode-back" href="../../spatial.html#spatial.EnerMo.EnerMo">[docs]</a>
+<span class="k">def</span> <span class="nf">EnerMo</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate energy, momentum and related quantities.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        model: Robot model structure</span>
+<span class="sd">        q: Joint position vector</span>
+<span class="sd">        qd: Joint velocity vector</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ret: Structure containing:</span>
+<span class="sd">            - KE: Kinetic energy of the system</span>
+<span class="sd">            - PE: Potential energy of the system</span>
+<span class="sd">            - htot: Total spatial momentum</span>
+<span class="sd">            - Itot: Total spatial inertia</span>
+<span class="sd">            - cm: Position of center of mass</span>
+<span class="sd">            - vcm: Linear velocity of center of mass</span>
+<span class="sd">            - Pjt: Joint positions in base coordinates</span>
+<span class="sd">            - Tr: Transformation matrices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Initialize variables</span>
+    <span class="n">KE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NB</span><span class="p">)</span>
+    <span class="n">Xup</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">Ic</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">hc</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">Xa</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">Tr</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">Pjt</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># First forward pass for velocities and kinetic energy</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">NB</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">XJ</span><span class="p">,</span> <span class="n">S</span> <span class="o">=</span> <span class="n">jcalc</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">jtype</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">vJ</span> <span class="o">=</span> <span class="n">S</span> <span class="o">*</span> <span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">Xup</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XJ</span> <span class="o">@</span> <span class="n">model</span><span class="o">.</span><span class="n">Xtree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vJ</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xup</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">v</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+</span> <span class="n">vJ</span>
+
+        <span class="n">Ic</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">hc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ic</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">KE</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">hc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c1"># Initialize total inertia and momentum</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;Itot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">Ic</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;htot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">hc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Calculate transformations and joint positions</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">NB</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">XJ</span> <span class="o">=</span> <span class="n">jcalc</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">jtype</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Xa</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XJ</span> <span class="o">@</span> <span class="n">model</span><span class="o">.</span><span class="n">Xtree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Xa</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xa</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">Xa</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="n">Xa</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># planar coordinate transform</span>
+            <span class="n">theta</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">plnr</span><span class="p">(</span><span class="n">Xa</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">rotz</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">@</span> <span class="n">xlt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">pluho</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">pluho</span><span class="p">(</span><span class="n">Xa</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># Efficient inverse calculation</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">R_T</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">Tdisp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">block</span><span class="p">([</span>
+            <span class="p">[</span><span class="n">R_T</span><span class="p">,</span> <span class="o">-</span><span class="n">R_T</span> <span class="o">@</span> <span class="n">p</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]],</span>
+            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))]</span>
+        <span class="p">])</span>
+
+        <span class="n">Tr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">Pjt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Tdisp</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+        <span class="c1"># Handle swing foot position</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">NB</span><span class="p">:</span>
+            <span class="n">Psw_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">Pjt_temp</span> <span class="o">=</span> <span class="n">Tdisp</span> <span class="o">@</span> <span class="n">Psw_f</span>
+            <span class="n">Pjt</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Pjt_temp</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;Pjt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Pjt</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;Tr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Tr</span>
+
+    <span class="c1"># Backward pass for total inertia and momentum</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NB</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Ic</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Ic</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+</span> \
+                <span class="n">Xup</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Ic</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">Xup</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">hc</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">hc</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+</span> <span class="n">Xup</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">hc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;Itot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;Itot&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Xup</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Ic</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">Xup</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;htot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;htot&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Xup</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">hc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c1"># Calculate gravitational terms</span>
+    <span class="n">a_grav</span> <span class="o">=</span> <span class="n">get_gravity</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a_grav</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>  <span class="c1"># 3D case</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">a_grav</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>  <span class="c1"># 3D linear gravitational acceleration</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;htot&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>  <span class="c1"># 3D linear momentum</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># 2D case</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">a_grav</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># 2D gravity</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;htot&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># 2D linear momentum</span>
+
+    <span class="c1"># Calculate mass properties</span>
+    <span class="n">mass</span><span class="p">,</span> <span class="n">cm</span> <span class="o">=</span> <span class="n">mcI</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s1">&#39;Itot&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Store final results</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;KE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">KE</span><span class="p">)</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;PE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">mass</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cm</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;cm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cm</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;vcm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span> <span class="o">/</span> <span class="n">mass</span>
+
+    <span class="k">return</span> <span class="n">ret</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pyspatial</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, PC.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

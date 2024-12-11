@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>spatial-py &#8212; pyspatial 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="spatial-py">
+<h1>spatial-py<a class="headerlink" href="#spatial-py" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dynamics.html">dynamics package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dynamics.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamics.html#module-dynamics.CMM">dynamics.CMM module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dynamics.html#dynamics.CMM.CMM"><code class="docutils literal notranslate"><span class="pre">CMM()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dynamics.html#dynamics.CMM.skew"><code class="docutils literal notranslate"><span class="pre">skew()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dynamics.html#module-dynamics.ContinuousDynamics">dynamics.ContinuousDynamics module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics.H_matrix"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics.H_matrix</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics.C_terms"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics.C_terms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics.KE"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics.KE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics.PE"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics.PE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics.p_com"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics.p_com</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics.v_com"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics.v_com</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics.CAM"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics.CAM</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamics.html#dynamics.ContinuousDynamics.ContinuousDynamics.CMMat"><code class="docutils literal notranslate"><span class="pre">ContinuousDynamics.CMMat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dynamics.html#module-dynamics.CoriolisAndGravityTerms">dynamics.CoriolisAndGravityTerms module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dynamics.html#dynamics.CoriolisAndGravityTerms.CoriolisAndGravityTerms"><code class="docutils literal notranslate"><span class="pre">CoriolisAndGravityTerms()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dynamics.html#module-dynamics.EnergyAndMomentum">dynamics.EnergyAndMomentum module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dynamics.html#dynamics.EnergyAndMomentum.EnergyAndMomentum"><code class="docutils literal notranslate"><span class="pre">EnergyAndMomentum()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dynamics.html#module-dynamics.HandC">dynamics.HandC module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dynamics.html#dynamics.HandC.HandC"><code class="docutils literal notranslate"><span class="pre">HandC()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dynamics.html#module-dynamics.apply_external_forces">dynamics.apply_external_forces module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dynamics.html#dynamics.apply_external_forces.apply_external_forces"><code class="docutils literal notranslate"><span class="pre">apply_external_forces()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dynamics.html#module-dynamics">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spatial.html">spatial package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.EnerMo">spatial.EnerMo module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.EnerMo.EnerMo"><code class="docutils literal notranslate"><span class="pre">EnerMo()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.FDab">spatial.FDab module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.FDab.FDab"><code class="docutils literal notranslate"><span class="pre">FDab()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.FDcrb">spatial.FDcrb module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.FDcrb.FDcrb"><code class="docutils literal notranslate"><span class="pre">FDcrb()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.FDfb">spatial.FDfb module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.FDfb.FDfb"><code class="docutils literal notranslate"><span class="pre">FDfb()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.FDgq">spatial.FDgq module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.FDgq.FDgq"><code class="docutils literal notranslate"><span class="pre">FDgq()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.Fpt">spatial.Fpt module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.Fpt.Fpt"><code class="docutils literal notranslate"><span class="pre">Fpt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.HD">spatial.HD module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.HD.HD"><code class="docutils literal notranslate"><span class="pre">HD()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.He">spatial.He module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.He.He"><code class="docutils literal notranslate"><span class="pre">He()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.ID">spatial.ID module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.ID.ID"><code class="docutils literal notranslate"><span class="pre">ID()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.IDfb">spatial.IDfb module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.IDfb.IDfb"><code class="docutils literal notranslate"><span class="pre">IDfb()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.InertiaMatrix">spatial.InertiaMatrix module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.InertiaMatrix.InertiaMatrix"><code class="docutils literal notranslate"><span class="pre">InertiaMatrix()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.LTDL">spatial.LTDL module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.LTDL.LTDL"><code class="docutils literal notranslate"><span class="pre">LTDL()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.LTL">spatial.LTL module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.LTL.LTL"><code class="docutils literal notranslate"><span class="pre">LTL()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.Vpt">spatial.Vpt module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.Vpt.Vpt"><code class="docutils literal notranslate"><span class="pre">Vpt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.Xpt">spatial.Xpt module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.Xpt.Xpt"><code class="docutils literal notranslate"><span class="pre">Xpt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.XtoV">spatial.XtoV module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.XtoV.XtoV"><code class="docutils literal notranslate"><span class="pre">XtoV()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.crf">spatial.crf module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.crf.crf"><code class="docutils literal notranslate"><span class="pre">crf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.crm">spatial.crm module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.crm.crm"><code class="docutils literal notranslate"><span class="pre">crm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.expandLambda">spatial.expandLambda module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.expandLambda.expandLambda"><code class="docutils literal notranslate"><span class="pre">expandLambda()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.fbanim">spatial.fbanim module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.fbanim.fbanim"><code class="docutils literal notranslate"><span class="pre">fbanim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.fbkin">spatial.fbkin module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.fbkin.fbkin"><code class="docutils literal notranslate"><span class="pre">fbkin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.fbkin.fwdkin"><code class="docutils literal notranslate"><span class="pre">fwdkin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.fbkin.invkin"><code class="docutils literal notranslate"><span class="pre">invkin()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.floatbase">spatial.floatbase module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.floatbase.floatbase"><code class="docutils literal notranslate"><span class="pre">floatbase()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.get_gravity">spatial.get_gravity module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.get_gravity.get_gravity"><code class="docutils literal notranslate"><span class="pre">get_gravity()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.jcalc">spatial.jcalc module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.jcalc.jcalc"><code class="docutils literal notranslate"><span class="pre">jcalc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.mcI">spatial.mcI module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mcI.mcI"><code class="docutils literal notranslate"><span class="pre">mcI()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mcI.mcI_to_rbi"><code class="docutils literal notranslate"><span class="pre">mcI_to_rbi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mcI.rbi_to_mcI"><code class="docutils literal notranslate"><span class="pre">rbi_to_mcI()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mcI.skew"><code class="docutils literal notranslate"><span class="pre">skew()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mcI.skewCustom"><code class="docutils literal notranslate"><span class="pre">skewCustom()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.mpyH">spatial.mpyH module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mpyH.mpyH"><code class="docutils literal notranslate"><span class="pre">mpyH()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.mpyL">spatial.mpyL module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mpyL.mpyL"><code class="docutils literal notranslate"><span class="pre">mpyL()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.mpyLi">spatial.mpyLi module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mpyLi.mpyLi"><code class="docutils literal notranslate"><span class="pre">mpyLi()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.mpyLit">spatial.mpyLit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mpyLit.mpyLit"><code class="docutils literal notranslate"><span class="pre">mpyLit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.mpyLt">spatial.mpyLt module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.mpyLt.mpyLt"><code class="docutils literal notranslate"><span class="pre">mpyLt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.plnr">spatial.plnr module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.plnr.plnr"><code class="docutils literal notranslate"><span class="pre">plnr()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.pluho">spatial.pluho module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.pluho.pluho"><code class="docutils literal notranslate"><span class="pre">pluho()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.pluho.skew"><code class="docutils literal notranslate"><span class="pre">skew()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.plux">spatial.plux module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.plux.plux"><code class="docutils literal notranslate"><span class="pre">plux()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.plux.skew"><code class="docutils literal notranslate"><span class="pre">skew()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.rotx">spatial.rotx module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rotx.rotx"><code class="docutils literal notranslate"><span class="pre">rotx()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.roty">spatial.roty module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.roty.roty"><code class="docutils literal notranslate"><span class="pre">roty()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.rotz">spatial.rotz module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rotz.rotz"><code class="docutils literal notranslate"><span class="pre">rotz()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.rq">spatial.rq module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rq.Etoq"><code class="docutils literal notranslate"><span class="pre">Etoq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rq.qtoE"><code class="docutils literal notranslate"><span class="pre">qtoE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rq.rq"><code class="docutils literal notranslate"><span class="pre">rq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rq.skew"><code class="docutils literal notranslate"><span class="pre">skew()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.rqd">spatial.rqd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rqd.rqd"><code class="docutils literal notranslate"><span class="pre">rqd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.rv">spatial.rv module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rv.Etov"><code class="docutils literal notranslate"><span class="pre">Etov()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rv.rv"><code class="docutils literal notranslate"><span class="pre">rv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rv.skew"><code class="docutils literal notranslate"><span class="pre">skew()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rv.vtoE"><code class="docutils literal notranslate"><span class="pre">vtoE()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.rx">spatial.rx module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rx.rx"><code class="docutils literal notranslate"><span class="pre">rx()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.ry">spatial.ry module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.ry.ry"><code class="docutils literal notranslate"><span class="pre">ry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.rz">spatial.rz module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.rz.rz"><code class="docutils literal notranslate"><span class="pre">rz()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.skew">spatial.skew module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.skew.skew"><code class="docutils literal notranslate"><span class="pre">skew()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial.xlt">spatial.xlt module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial.html#spatial.xlt.xlt"><code class="docutils literal notranslate"><span class="pre">xlt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spatial.html#module-spatial">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.floatbase">models.floatbase module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.floatbase.floatbase"><code class="docutils literal notranslate"><span class="pre">floatbase()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">pyspatial</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, PC.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/modules.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

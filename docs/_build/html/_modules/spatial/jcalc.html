@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spatial.jcalc &#8212; pyspatial 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for spatial.jcalc</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">spatial.rotx</span> <span class="kn">import</span> <span class="n">rotx</span>
+<span class="kn">from</span> <span class="nn">spatial.roty</span> <span class="kn">import</span> <span class="n">roty</span>
+<span class="kn">from</span> <span class="nn">spatial.rotz</span> <span class="kn">import</span> <span class="n">rotz</span>
+<span class="kn">from</span> <span class="nn">spatial.xlt</span> <span class="kn">import</span> <span class="n">xlt</span>
+<span class="kn">from</span> <span class="nn">spatial.plnr</span> <span class="kn">import</span> <span class="n">plnr</span>
+
+
+<div class="viewcode-block" id="jcalc">
+<a class="viewcode-back" href="../../spatial.html#spatial.jcalc.jcalc">[docs]</a>
+<span class="k">def</span> <span class="nf">jcalc</span><span class="p">(</span><span class="n">jtyp</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate joint transform and motion subspace matrices.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        jtyp: Either a string or a dict containing joint type code.</span>
+<span class="sd">              For parameterized joints (e.g. helical), jtyp must be a dict</span>
+<span class="sd">              with &#39;code&#39; and &#39;pars&#39; fields.</span>
+<span class="sd">        q: Joint position variable</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Xj: Joint transform matrix</span>
+<span class="sd">        S: Motion subspace matrix</span>
+
+<span class="sd">    Joint types:</span>
+<span class="sd">        &#39;Rx&#39;: Revolute X axis</span>
+<span class="sd">        &#39;Ry&#39;: Revolute Y axis</span>
+<span class="sd">        &#39;R&#39;,&#39;Rz&#39;: Revolute Z axis</span>
+<span class="sd">        &#39;Px&#39;: Prismatic X axis</span>
+<span class="sd">        &#39;Py&#39;: Prismatic Y axis</span>
+<span class="sd">        &#39;P&#39;,&#39;Pz&#39;: Prismatic Z axis</span>
+<span class="sd">        &#39;H&#39;: Helical (Z axis)</span>
+<span class="sd">        &#39;r&#39;: Planar revolute</span>
+<span class="sd">        &#39;px&#39;: Planar prismatic X axis</span>
+<span class="sd">        &#39;py&#39;: Planar prismatic Y axis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get joint type code</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">jtyp</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">jtyp</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">jtyp</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Calculate joint transform and motion subspace based on joint type</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;Rx&#39;</span><span class="p">:</span>  <span class="c1"># revolute X axis</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">rotx</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;Ry&#39;</span><span class="p">:</span>  <span class="c1"># revolute Y axis</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">roty</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="s1">&#39;Rz&#39;</span><span class="p">]:</span>  <span class="c1"># revolute Z axis</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">rotz</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;Px&#39;</span><span class="p">:</span>  <span class="c1"># prismatic X axis</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">xlt</span><span class="p">([</span><span class="n">q</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;Py&#39;</span><span class="p">:</span>  <span class="c1"># prismatic Y axis</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">xlt</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="s1">&#39;Pz&#39;</span><span class="p">]:</span>  <span class="c1"># prismatic Z axis</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">xlt</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">q</span><span class="p">])</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>  <span class="c1"># helical (Z axis)</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="n">jtyp</span><span class="p">[</span><span class="s1">&#39;pars&#39;</span><span class="p">][</span><span class="s1">&#39;pitch&#39;</span><span class="p">]</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">rotz</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">@</span> <span class="n">xlt</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">q</span> <span class="o">*</span> <span class="n">pitch</span><span class="p">])</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">pitch</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>  <span class="c1"># planar revolute</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">plnr</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;px&#39;</span><span class="p">:</span>  <span class="c1"># planar prismatic X axis</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">plnr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">q</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;py&#39;</span><span class="p">:</span>  <span class="c1"># planar prismatic Y axis</span>
+        <span class="n">Xj</span> <span class="o">=</span> <span class="n">plnr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">q</span><span class="p">])</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized joint code &#39;</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Xj</span><span class="p">,</span> <span class="n">S</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pyspatial</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, PC.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
