@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="pyRBDA",
-    version="0.1.0",
-    author="Your Name",
+    version="0.1.1",
+    author="PC",
     author_email="premc946@gmail.com",
     description="Rigid-body spatial math in Python",
     long_description=open('README.md').read(),

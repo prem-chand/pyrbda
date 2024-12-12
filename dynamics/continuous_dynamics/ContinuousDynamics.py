@@ -1,5 +1,5 @@
-from dynamics.HandC import HandC
-from dynamics.EnergyAndMomentum import EnergyAndMomentum
+from dynamics.continuous_dynamics.HandC import HandC
+from dynamics.continuous_dynamics.EnergyAndMomentum import EnergyAndMomentum
 from dynamics.CMM import CMM
 
 

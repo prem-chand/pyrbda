@@ -21,7 +21,9 @@ def pluho(matrix_in):
         If input is 6x6: returns 4x4 homogeneous transform matrix
         If input is 4x4: returns 6x6 Plucker matrix
     """
-    matrix_in = np.asarray(matrix_in)
+    # matrix_in = np.asarray(matrix_in)
+    out2skew = 0*matrix_in[:3, 0]
+    out = 0*matrix_in[:4, :4]
 
     if matrix_in.shape == (6, 6):  # Plucker -> 4x4 homogeneous
         E = matrix_in[0:3, 0:3]
@@ -29,16 +31,23 @@ def pluho(matrix_in):
         in2skew = mErx @ E.T
 
         if in2skew.shape == (3, 3):
-            out2skew = 0.5 * np.array([
-                in2skew[2, 1] - in2skew[1, 2],
-                in2skew[0, 2] - in2skew[2, 0],
-                in2skew[1, 0] - in2skew[0, 1]
-            ])
+            # out2skew = 0.5 * np.array([
+            #     in2skew[2, 1] - in2skew[1, 2],
+            #     in2skew[0, 2] - in2skew[2, 0],
+            #     in2skew[1, 0] - in2skew[0, 1]
+            # ])
+            out2skew[0] = 0.5 * (in2skew[2, 1] - in2skew[1, 2])
+            out2skew[1] = 0.5 * (in2skew[0, 2] - in2skew[2, 0])
+            out2skew[2] = 0.5 * (in2skew[1, 0] - in2skew[0, 1])
 
-        out = np.vstack([
-            np.hstack([E, out2skew.reshape(3, 1)]),
-            np.array([[0, 0, 0, 1]])
-        ])
+        out[0:3, 0:3] = E
+        out[:3, 3] = out2skew
+        out[3, 3] = 1
+
+        # out = np.vstack([
+        #     np.hstack([E, out2skew.reshape(3, 1)]),
+        #     np.array([[0, 0, 0, 1]])
+        # ])
 
     else:  # 4x4 homogeneous -> Plucker
         E = matrix_in[0:3, 0:3]

@@ -3,7 +3,7 @@ from spatial.jcalc import jcalc
 from spatial.crm import crm
 from spatial.crf import crf
 from spatial.get_gravity import get_gravity
-from dynamics.CoriolisAndGravityTerms import CoriolisAndGravityTerms
+from dynamics.continuous_dynamics.CoriolisAndGravityTerms import CoriolisAndGravityTerms
 from spatial.InertiaMatrix import InertiaMatrix
 
 

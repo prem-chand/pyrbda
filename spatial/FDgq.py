@@ -1,5 +1,5 @@
 import numpy as np
-from dynamics.HandC import HandC
+from dynamics.continuous_dynamics.HandC import HandC
 
 
 def FDgq(model, q, qd, tau, f_ext=None):
