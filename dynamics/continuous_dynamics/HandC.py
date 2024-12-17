@@ -7,7 +7,7 @@ from dynamics.continuous_dynamics.CoriolisAndGravityTerms import CoriolisAndGrav
 from spatial.InertiaMatrix import InertiaMatrix
 
 
-def HandC(obj, sys):
+def HandC(sys):
     """
     Calculate coefficients of equation of motion.
 
@@ -18,7 +18,6 @@ def HandC(obj, sys):
     velocity-product terms, and tau is the joint force vector.
 
     Parameters:
-        obj: Object containing necessary methods
         sys: System containing model and state information
 
     Returns:
@@ -29,10 +28,11 @@ def HandC(obj, sys):
     model = sys.Model
     Xtree = sys.Model.Xtree
 
-    q = sys.States.q.sym
-    qd = sys.States.dq.sym
+    q = sys.qpos0
+    qd = sys.qvel0
 
-    nd = model.nd
+    nd = model.params.nb
+    body_id = model.params.body_id
 
     a_grav = get_gravity(sys.Model)
 
@@ -43,25 +43,37 @@ def HandC(obj, sys):
     fvp = {}
     S = {}
 
+    idx1 = slice(0, 6)  # corresponds to free joint
+    idx2 = [i+6 for i in range(12)]  # corresponds to revolute joints
+    v_idx = [idx1, *idx2]
+
+    idx3 = [i+7 for i in range(13)]  # corresponds to all joints
+    q_idx = [slice(0, 7), *idx3]
+
+    parent_dict = model.parent_id
+    parent_dict.pop(0)
+
     # Forward pass for velocities and accelerations
-    for i in range(1, nd + 1):
-        XJ, S[i] = jcalc(model.jtype[i], q[i-1])
-        vJ = S[i] * qd[i-1]
+    for i in range(nd-1):
+        XJ, S[i] = jcalc(model.jtype[i], q[q_idx[i]])
+        vJ = (S[i] @ qd[v_idx[i]]).reshape((-1, 1))
+        
         Xup[i] = XJ @ Xtree[i]
 
-        if model.parent[i] == 0:
+        if parent_dict[i+1] == 0:
             v[i] = vJ
             avp[i] = Xup[i] @ (-a_grav)
         else:
-            v[i] = Xup[i] @ v[model.parent[i]] + vJ
-            avp[i] = Xup[i] @ avp[model.parent[i]] + crm(v[i]) @ vJ
+            v[i] = Xup[i] @ v[parent_dict[i]] + vJ
+            avp[i] = Xup[i] @ avp[parent_dict[i]] + crm(v[i]) @ vJ
 
-        fvp[i] = model.I[i] @ avp[i] + crf(v[i]) @ model.I[i] @ v[i]
+        fvp[i] = model.fullinertia[i+1] @ avp[i] + \
+            crf(v[i]) @ model.fullinertia[i+1] @ v[i]
 
     # Calculate C using Coriolis and gravity terms
-    C = CoriolisAndGravityTerms(obj, sys, q, S, Xup, fvp)
+    C = CoriolisAndGravityTerms(sys, q, S, Xup, fvp)
 
     # Calculate H using inertia matrix
-    H = InertiaMatrix(obj, sys, q, S, Xup)
+    H = InertiaMatrix(sys, q, S, Xup)
 
     return H, C

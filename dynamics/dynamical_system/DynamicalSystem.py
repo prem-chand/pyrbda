@@ -1,11 +1,15 @@
 import numpy as np
 import casadi as ca
+import mujoco_py as mp
 
 from spatial.jcalc import jcalc
 from spatial.plnr import plnr
 from spatial.rotz import rotz
 from spatial.xlt import xlt
 from spatial.pluho import pluho
+from spatial.skew import skew
+
+from dynamics.continuous_dynamics.ContinuousDynamics import ContinuousDynamics
 
 
 class DynamicalSystem:
@@ -31,13 +35,20 @@ class DynamicalSystem:
         self.InputMap = robot_structure.B
         del self.Model.B
 
+        # testing
+        self.HT = {}
+        self.Bpos = {}
+
+        self.qpos0 = model.qpos0
+        self.qvel0 = model.qvel0
+
         self.HTransforms = self.homogeneous_transforms()
         self.BodyPositions = self.get_body_positions()
+        self.SitePositions = self.get_site_positions()
         self.BodyVelocities = self.get_body_velocities()
-        self.Dynamics = self.continuous_dynamics()
+        self.Dynamics = ContinuousDynamics(self)
 
     def add_states(self):
-        # Implementation for adding states
         """
         Add states to the DynamicalSystem object.
         """
@@ -58,7 +69,6 @@ class DynamicalSystem:
         del self.Model.qdd
 
     def add_inputs(self):
-        # Implementation for adding inputs
         """
         Add inputs to the DynamicalSystem object.
         """
@@ -82,53 +92,44 @@ class DynamicalSystem:
             T: List of homogeneous transforms
         """
         model = self.Model
-        q = self.States['q']
-
-        # print(self.States['q'])
+        q = self.qpos0
 
         Xtree = model.Xtree
 
-        # return
-
         Xa = {}
+        Xup = {}
         T = []
+        Tsite = []
 
-        # if first joint is free joint (6-DOF)
+        Xup['world'] = ca.SX.eye(6)
         if model.jtype[0] == 'free':
-            # pass # TODO
             XJ, _ = jcalc(model.jtype[0], q[:7])
-            Xa[0] = XJ @ Xtree[0]
-            T.append(pluho(Xa[0]))
-            for i in range(1, model.params.nv-6):
-                print(model.jtype[i], q[i+6])
-                XJ, _ = jcalc(model.jtype[i], q[i+6])
-                Xa[i] = XJ @ Xtree[i]
-                if model.parent[i] != 0:
-                    Xa[i] = Xa[i] @ Xa[model.parent[i]]
+            Xup[model.body_names[1]] = XJ @ Xtree[0]
+            T.append(pluho(Xup[model.body_names[1]]))
 
-                if Xa[i].shape[0] == 3:  # Xa[i] is a planar coordinate transform
-                    theta, r = plnr(Xa[i])
-                    X = rotz(theta) @ xlt(np.append(r, 0))
-                    T.append(pluho(X))
-                else:
-                    T.append(pluho(Xa[i]))
+        for i in range(2, model.params.nv-4):
+            body_name = model.body_names[i]
+            XJ, _ = jcalc(model.jtype[i-1], q[i+5])
+            Xa[i] = XJ @ Xtree[i]
 
-        else:
-            for i in range(model.params.nv):
-                print(model.jtype[i], q[i])
-                XJ, _ = jcalc(model.jtype[i], q[i])
-                Xa[i] = XJ @ Xtree[i]
-                if model.parent[i] != 0:
-                    Xa[i] = Xa[i] @ Xa[model.parent[i]]
+            if model.parent[body_name] != 'world':
+                Xup[body_name] = Xa[i] @ Xup[model.parent[body_name]]
 
-                if Xa[i].shape[0] == 3:  # Xa[i] is a planar coordinate transform
-                    theta, r = plnr(Xa[i])
-                    X = rotz(theta) @ xlt(np.append(r, 0))
-                    T.append(pluho(X))
-                else:
-                    T.append(pluho(Xa[i]))
+            T.append(pluho(Xup[body_name]))
 
-        return T
+        R = np.zeros((9,))
+        for i in range(model.params.nsite):
+            body_name = model.params.site_parent[i]
+            site_name = model.site_names[i]
+            mp.functions.mju_quat2Mat(R, model.params.site_quat[i])
+            R_site = R.reshape(3, 3)
+            Xtree[site_name] = np.linalg.inv(np.block([[R_site, np.zeros((3, 3))], [
+                skew(model.params.site_pos[i]) @ R_site, R_site]]))
+            Xa[site_name] = Xtree[site_name] @ Xup[body_name]
+
+            Tsite.append(pluho(Xa[site_name]))
+
+        return T, Tsite
 
     def get_body_positions(self):
         """
@@ -143,23 +144,41 @@ class DynamicalSystem:
         model = self.Model
         nd = model.params.nv
 
-        T = self.HTransforms
+        T, _ = self.HTransforms
         pos_body = []
 
-        for i in range(nd-6):
+        for i in range(model.params.nv-5):
             T_i = T[i]
             R_i = T_i[:3, :3].T
             p_i = -R_i @ T_i[:3, 3]
 
-            # T_next = np.vstack(
-            #     (np.hstack((R_i, p_i.reshape(-1, 1))), [0, 0, 0, 1]))
-            # p_next = T_next @ np.append(model['body_length']
-            #                             [i] * model['body_axis'][i], 1)
-
-            # pos_body.append((p_i, p_next[:3]))
             pos_body.append(p_i)
 
         return pos_body
+
+    def get_site_positions(self):
+        """
+        Calculate the site positions.
+
+        Parameters:
+            self: Instance of DynamicalSystem
+
+        Returns:
+            pos_site: List of site positions
+        """
+        _, T = self.HTransforms
+        pos_site = []
+
+        model = self.Model
+
+        for i in range(model.params.nsite):
+            T_i = T[i]
+            R_i = T_i[:3, :3].T
+            p_i = -R_i @ T_i[:3, 3]
+
+            pos_site.append(p_i)
+
+        return pos_site
 
     def get_body_velocities(self):
         """
@@ -182,8 +201,8 @@ class DynamicalSystem:
 
         if (model.params.nq == model.params.nv):
             for i in range(nd):
-                Jac_1 = ca.jacobian(self.BodyPositions[i][0] @ S, q)
-                Jac_2 = ca.jacobian(self.BodyPositions[i][1] @ S, q)
+                Jac_1 = ca.jacobian(self.BodyPositions[i][0], q)
+                Jac_2 = ca.jacobian(self.BodyPositions[i][1], q)
 
                 vel_1 = Jac_1 @ dq
                 vel_2 = Jac_2 @ dq
@@ -192,18 +211,21 @@ class DynamicalSystem:
 
             return vel_body
         else:
-            # TODO: Implement this
+            for i in range(model.params.nv-5):
+                Jac_1 = ca.jacobian(self.BodyPositions[i], q) @ S
+
+                vel_1 = Jac_1 @ dq
+
+                vel_body.append(vel_1)
+
             return vel_body
 
-    def continuous_dynamics(self):
-        # Implementation for continuous dynamics
-        pass
-
     def w2velTransform(self):
-        """This mapping transforms the qd to the derivatives to position vectors.
+        """
+        This mapping transforms the qd to the derivatives to position vectors.
 
         Returns:
-            _type_: _description_
+            S: Transformation matrix
         """
         model = self.Model
         S = ca.SX.zeros(model.params.nq, model.params.nv)

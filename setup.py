@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pyRBDA",
-    version="0.1.1",
+    version="0.1.3",
     author="PC",
     author_email="premc946@gmail.com",
     description="Rigid-body spatial math in Python",
@@ -19,5 +19,6 @@ setup(
     install_requires=[
         # List your package dependencies here
         "numpy",
+        "casadi"
     ],
 )

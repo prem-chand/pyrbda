@@ -8,6 +8,9 @@ def xlt(r):
     coordinates for spatial motion vectors, in which frame B is translated by
     an amount r (3D vector) relative to frame A. r can be a row or column vector.
     """
+    if isinstance(r, np.ndarray) and r.ndim == 2:
+        r = r.flatten().copy()
+
     X = np.array([
         [1, 0, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0],

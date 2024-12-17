@@ -32,4 +32,4 @@ def get_gravity(model):
     else:  # spatial model
         a_grav = np.array([0, 0, 0, g[0], g[1], g[2]])
 
-    return a_grav
+    return a_grav.reshape((-1, 1))

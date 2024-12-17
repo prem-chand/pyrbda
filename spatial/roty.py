@@ -9,6 +9,9 @@ def roty(theta):
     rotated by an angle theta (radians) relative to frame A about their
     common Y axis.
     """
+    if isinstance(theta, np.ndarray):
+        theta = theta.item()
+
     c = np.cos(theta)
     s = np.sin(theta)
 

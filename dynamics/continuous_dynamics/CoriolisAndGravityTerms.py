@@ -1,12 +1,11 @@
 import numpy as np
 
 
-def CoriolisAndGravityTerms(obj, sys, q, S, Xup, fvp):
+def CoriolisAndGravityTerms(sys, q, S, Xup, fvp):
     """
     Calculate Coriolis, centrifugal, and gravity terms.
 
     Parameters:
-        obj: Object containing necessary methods
         sys: System containing model information
         q: Joint position vector
         S: Dictionary of motion subspaces
@@ -19,16 +18,24 @@ def CoriolisAndGravityTerms(obj, sys, q, S, Xup, fvp):
 
     model = sys.Model
     parent = model.parent
-    nd = model.nd
+    nd = model.params.nj  # number of joints
 
     # Initialize C vector
-    C = np.zeros(nd)
+    if isinstance(q, np.ndarray):
+        C = np.zeros((model.params.nv, 1))
+    else:
+        C = 0*sys.States['dq']
+
+    idx1 = slice(0, 6)  # corresponds to free joint
+    idx2 = [i+6 for i in range(12)]  # corresponds to revolute joints
+    v_idx = [idx1, *idx2]
 
     # Backward pass to accumulate forces
-    for i in range(nd, 0, -1):
-        C[i-1] = S[i].T @ fvp[i]
+    for i in range(nd-1, 0, -1):
+        C[v_idx[i]] = S[i].T @ fvp[i]
+        fvp[model.parent_id[i]] = fvp[model.parent_id[i]] + \
+                Xup[i].T @ fvp[i]
 
-        if parent[i] != 0:
-            fvp[parent[i]] = fvp[parent[i]] + Xup[i].T @ fvp[i]
+    C[:6] = S[0].T @ fvp[0]
 
     return C
