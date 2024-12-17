@@ -5,8 +5,8 @@ from spatial.jcalc import jcalc
 from spatial.crm import crm
 from spatial.crf import crf
 from spatial.get_gravity import get_gravity
-from .CoriolisAndGravityTerms import compute_coriolis_gravity_terms
-from spatial.InertiaMatrix import compute_inertia_matrix
+from .CoriolisAndGravityTerms import CoriolisAndGravityTerms
+from spatial.InertiaMatrix import InertiaMatrix
 
 
 def compute_dynamics_terms(system: Any) -> Tuple[np.ndarray, np.ndarray]:
@@ -36,7 +36,7 @@ def compute_dynamics_terms(system: Any) -> Tuple[np.ndarray, np.ndarray]:
     state_vars = _forward_pass(system, state_vars, v_indices, q_indices)
     
     # Compute final terms
-    C = compute_coriolis_gravity_terms(system, q, state_vars['S'], 
+    C = CoriolisAndGravityTerms(system, q, state_vars['S'], 
                                      state_vars['Xup'], state_vars['fvp'])
     H = compute_inertia_matrix(system, q, state_vars['S'], state_vars['Xup'])
     

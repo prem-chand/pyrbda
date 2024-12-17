@@ -59,8 +59,8 @@ class DynamicalSystem:
         self._initialize_system_parameters(model)
         
         # Store initial conditions
-        self.qpos0 = model.qpos0
-        self.qvel0 = model.qvel0
+        self.qpos0 = model.params.data.qpos
+        self.qvel0 = model.params.data.qvel
 
         # Compute transformations and kinematics
         self._compute_all_kinematics()

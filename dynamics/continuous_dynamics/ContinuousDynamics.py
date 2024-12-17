@@ -3,7 +3,7 @@ from typing import Any, Optional
 import numpy as np
 
 from .HandC import compute_dynamics_terms
-from .EnergyAndMomentum import compute_energy_and_momentum
+from .EnergyAndMomentum import EnergyAndMomentum
 from ..CMM import CMM
 
 @dataclass
