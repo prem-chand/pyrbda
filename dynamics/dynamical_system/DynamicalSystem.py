@@ -21,6 +21,9 @@ from spatial.skew import skew
 from dynamics.continuous_dynamics.ContinuousDynamics import ContinuousDynamics
 
 
+verbose = False
+
+
 class DynamicalSystem:
     """
     A class for managing robot dynamics calculations and state transformations.
@@ -51,7 +54,6 @@ class DynamicalSystem:
         """
         self.Model = model
         self.Name = model.name
-        del self.Model.name
 
         # Initialize system components
         self._initialize_states()
@@ -59,8 +61,8 @@ class DynamicalSystem:
         self._initialize_system_parameters(model)
 
         # Store initial conditions
-        self.qpos0 = model.params.data.qpos
-        self.qvel0 = model.params.data.qvel
+        # self.qpos0 = model.params.data.qpos
+        # self.qvel0 = model.params.data.qvel
 
         # Compute transformations and kinematics
         self._compute_all_kinematics()
@@ -80,16 +82,12 @@ class DynamicalSystem:
         self.States['dq'].ID = 'vel'
         self.States['ddq'].ID = 'acc'
 
-        # Cleanup model attributes
-        del self.Model.q, self.Model.qd, self.Model.qdd
-
     def _initialize_inputs(self):
         """
         Initialize control input variables.
         """
         self.Inputs = {'u': self.Model.u}
         self.Inputs['u'].ID = 'input'
-        del self.Model.u
 
     def _initialize_system_parameters(self, model):
         """
@@ -100,7 +98,6 @@ class DynamicalSystem:
         """
         self.Gravity = model.gravity
         self.InputMap = model.B
-        del self.Model.gravity, self.Model.B
 
         # Initialize transformation dictionaries
         self.HT = {}
@@ -114,7 +111,9 @@ class DynamicalSystem:
         self.BodyPositions = self._compute_body_positions()
         self.SitePositions = self._compute_site_positions()
         self.BodyVelocities = self._compute_body_velocities()
-        self.Dynamics = ContinuousDynamics(self)
+        self.SiteVelocities = self._compute_site_velocities()
+
+        # self.Dynamics = ContinuousDynamics(self)
 
     def _compute_homogeneous_transforms(self):
         """
@@ -124,7 +123,8 @@ class DynamicalSystem:
             tuple: (T, Tsite) containing body and site transformations
         """
         model = self.Model
-        q = self.qpos0
+        # q = self.qpos0
+        q = self.States['q']
         Xtree = model.Xtree
 
         # Initialize transformation dictionaries
@@ -139,9 +139,10 @@ class DynamicalSystem:
         parent_child_dict = {}
         # Xa = {0: np.eye(6)}
 
-        print("--------------------------------------------------")
-        print("---------Xa------------------------------------")
-        print("--------------------------------------------------")
+        if verbose:
+            print("--------------------------------------------------")
+            print("---------Xa------------------------------------")
+            print("--------------------------------------------------")
 
         for j, body_name in enumerate(model.body_names):
             parent_child_dict[body_name] = model.params.mj_model.body_id2name(
@@ -153,7 +154,8 @@ class DynamicalSystem:
                 model.params.mj_model.jnt_bodyid[i])
             # body_id = model.params.mj_model.jnt_bodyid[i]
             # parent_id = model.parent[body_id]
-            XJ, _ = jcalc(model.jtype[i], q[model.params.jnt_qposaddr[i]                          :model.params.jnt_qposaddr[i]+model.params.jnt_dim[i]])
+            XJ, _ = jcalc(model.jtype[i], q[model.params.jnt_qposaddr[i]
+                          :model.params.jnt_qposaddr[i]+model.params.jnt_dim[i]])
             Xa[jnt_name] = XJ @ Xtree[jnt_parent]
 
             if parent_child_dict[jnt_parent] != 'world':
@@ -161,53 +163,14 @@ class DynamicalSystem:
 
             T.append(pluho(Xup[jnt_parent]))
 
-            print(i, jnt_name)
-            print(Xup[jnt_parent])
-
-        # for i in range(model.params.nj):
-        #     body_name = model.body_names[i]
-        #     body_id = model.params.body_id[body_name]
-        #     XJ, _ = jcalc(model.jtype[i], q[model.params.jnt_qposaddr[i]:model.params.jnt_qposaddr[i]+model.params.jnt_dim[i]])
-        #     Xa[body_id] = XJ @ Xtree[i]
-
-        #     if model.parent[body_id] != 0:
-        #         Xa[body_id] = Xa[body_id] @ Xa[model.parent[body_id]]
-            # T.append(pluho(Xa[body_id]))
-        # Handle free joint case
-        # if model.jtype[0] == 'free':
-        #     XJ, _ = jcalc(model.jtype[0], q[:7])
-        #     Xup[1] = XJ @ Xtree[0]
-        #     T.append(pluho(Xup[1]))
-
-        # Compute transforms for each body
-        # self._compute_body_transforms(model, q, Xtree, Xa, Xup, T)
+            if verbose:
+                print(i, jnt_name)
+                print(Xup[jnt_parent])
 
         # Compute site transforms
         Tsite = self._compute_site_transforms(model, Xup, Xa, Xtree)
 
         return T, Tsite
-
-    # def _compute_body_transforms(self, model, q, Xtree, Xa, Xup, T):
-    #     """
-    #     Compute transformations for each body in the robot.
-
-    #     Args:
-    #         model: Robot model
-    #         q: Joint positions
-    #         Xtree: Tree structure transforms
-    #         Xa: Link-to-link transforms
-    #         Xup: World-to-link transforms
-    #         T: List to store transformations
-    #     """
-    #     for i in range(1, model.params.nb):
-    #         body_name = model.body_names[i]
-    #         XJ, _ = jcalc(model.jtype[i], q[i+5])
-    #         Xa[i] = XJ @ Xtree[i]
-
-    #         if model.parent[i] != 0:
-    #             Xup[i] = Xa[i] @ Xup[model.parent[i]]
-
-    #         T.append(pluho(Xup[i]))
 
     def _compute_site_transforms(self, model, Xup, Xa, Xtree):
         """
@@ -256,9 +219,10 @@ class DynamicalSystem:
         T, _ = self.HTransforms
         pos_body = []
 
-        print("--------------------------------------------------")
-        print("---------Body Positions---------------------------")
-        print("--------------------------------------------------")
+        if verbose:
+            print("--------------------------------------------------")
+            print("---------Body Positions---------------------------")
+            print("--------------------------------------------------")
 
         for i in range(model.params.nv-5):
             T_i = T[i]
@@ -266,8 +230,9 @@ class DynamicalSystem:
             p_i = -R_i @ T_i[:3, 3]
             pos_body.append(p_i)
 
-            print(model.body_names[i], p_i)
-            print(model.body_names[i], model.params.data.body_xpos[i+1])
+            if verbose:
+                print(model.body_names[i], p_i)
+                print(model.body_names[i], model.params.data.body_xpos[i+1])
 
         return pos_body
 
@@ -282,9 +247,10 @@ class DynamicalSystem:
         _, T = self.HTransforms
         pos_site = []
 
-        print("--------------------------------------------------")
-        print("---------Site Positions---------------------------")
-        print("--------------------------------------------------")
+        if verbose:
+            print("--------------------------------------------------")
+            print("---------Site Positions---------------------------")
+            print("--------------------------------------------------")
 
         for i in range(model.params.nsite):
             T_i = T[i]
@@ -292,8 +258,9 @@ class DynamicalSystem:
             p_i = -R_i @ T_i[:3, 3]
             pos_site.append(p_i)
 
-            print(model.site_names[i], p_i)
-            print(model.site_names[i], model.params.data.site_xpos[i])
+            if verbose:
+                print(model.site_names[i], p_i)
+                print(model.site_names[i], model.params.data.site_xpos[i])
 
         return pos_site
 
@@ -308,53 +275,29 @@ class DynamicalSystem:
         q = self.States['q']
         dq = self.States['dq']
         S = self.w2velTransform()
-        vel_body = []
 
-        if model.params.nq == model.params.nv:
-            return self._compute_equal_dim_velocities(model, q, dq)
-        else:
-            return self._compute_different_dim_velocities(model, q, dq, S)
-
-    def _compute_equal_dim_velocities(self, model, q, dq):
-        """
-        Compute velocities when number of positions equals number of velocities.
-
-        Args:
-            model: Robot model
-            q: Joint positions
-            dq: Joint velocities
-
-        Returns:
-            list: Body velocities
-        """
-        vel_body = []
-        for i in range(model.params.nv):
-            Jac_1 = ca.jacobian(self.BodyPositions[i][0], q)
-            Jac_2 = ca.jacobian(self.BodyPositions[i][1], q)
-            vel_1 = Jac_1 @ dq
-            vel_2 = Jac_2 @ dq
-            vel_body.append((vel_1, vel_2))
-        return vel_body
-
-    def _compute_different_dim_velocities(self, model, q, dq, S):
-        """
-        Compute velocities when number of positions differs from number of velocities.
-
-        Args:
-            model: Robot model
-            q: Joint positions
-            dq: Joint velocities
-            S: Velocity transformation matrix
-
-        Returns:
-            list: Body velocities
-        """
         vel_body = []
         for i in range(model.params.nv-5):
             Jac_1 = ca.jacobian(self.BodyPositions[i], q) @ S
             vel_1 = Jac_1 @ dq
             vel_body.append(vel_1)
         return vel_body
+
+    def _compute_site_velocities(self):
+        """
+        Calculate velocities for all the sites in the robot.
+        """
+        model = self.Model
+        q = self.States['q']
+        dq = self.States['dq']
+        S = self.w2velTransform()
+
+        vel_site = []
+        for i in range(model.params.nsite):
+            Jac_1 = ca.jacobian(self.SitePositions[i], q) @ S
+            vel_1 = Jac_1 @ dq
+            vel_site.append(vel_1)
+        return vel_site
 
     def w2velTransform(self):
         """
@@ -370,7 +313,7 @@ class DynamicalSystem:
 
         # Get quaternion components
         q = self.States['q']
-        p0, p1, p2, p3 = q[3:7]
+        p0, p1, p2, p3 = q[3], q[4], q[5], q[6]
 
         # Compute quaternion transformation matrix
         self._compute_quaternion_transform(Sfree, p0, p1, p2, p3)
@@ -392,13 +335,17 @@ class DynamicalSystem:
             p0, p1, p2, p3: Quaternion components
         """
         # First row
-        Sfree[3, 3:6] = [-p1/2, -p2/2, -p3/2]
+        # Sfree[3, 3:6] = [-p1/2, -p2/2, -p3/2]
+        Sfree[3, 3], Sfree[3, 4], Sfree[3, 5] = -p1/2, -p2/2, -p3/2
 
         # Second row
-        Sfree[4, 3:6] = [p0/2, -p3/2, p2/2]
+        # Sfree[4, 3:6] = [p0/2, -p3/2, p2/2]
+        Sfree[4, 3], Sfree[4, 4], Sfree[4, 5] = p0/2, -p3/2, p2/2
 
         # Third row
-        Sfree[5, 3:6] = [p3/2, p0/2, -p1/2]
+        # Sfree[5, 3:6] = [p3/2, p0/2, -p1/2]
+        Sfree[5, 3], Sfree[5, 4], Sfree[5, 5] = p3/2, p0/2, -p1/2
 
         # Fourth row
-        Sfree[6, 3:6] = [-p2/2, p1/2, p0/2]
+        # Sfree[6, 3:6] = [-p2/2, p1/2, p0/2]
+        Sfree[6, 3], Sfree[6, 4], Sfree[6, 5] = -p2/2, p1/2, p0/2
